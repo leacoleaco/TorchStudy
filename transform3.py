@@ -16,9 +16,9 @@ class TransformerModel(nn.Module):
         self.fc = nn.Linear(input_dim, output_dim)
 
     def forward(self, x):
-        # x shape: (sequence_length, batch_size, input_dim)
-        x = x.permute(1, 0, 2)  # Change to (batch_size, sequence_length, input_dim)
-        x = self.transformer(x, x)
+        # x shape: (sequence_length, input_dim)
+        x = x.unsqueeze(1)  # Change to (1, sequence_length, input_dim)
+        x = self.transformer(x, x)  # Pass through transformer
         x = x.mean(dim=0)  # Average over the sequence length
         return self.fc(x)
 
@@ -28,18 +28,20 @@ criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.01)
 
 # Training loop
-for epoch in range(100):  # Number of epochs
+for epoch in range(1000):  # Number of epochs
     model.train()
-    optimizer.zero_grad()
-    outputs = model(x_train)
-    loss = criterion(outputs, y_train)
-    loss.backward()
-    optimizer.step()
+    for i in range(len(x_train)):
+        optimizer.zero_grad()
+        outputs = model(x_train[i])  # Pass a single item
+        loss = criterion(outputs, y_train[i].unsqueeze(0))
+        loss.backward()
+        optimizer.step()
     if (epoch + 1) % 10 == 0:
         print(f'Epoch [{epoch + 1}/100], Loss: {loss.item():.4f}')
 
 # Evaluation
 model.eval()
 with torch.no_grad():
-    predictions = model(x_train)
-    print("Predictions:", predictions.squeeze().numpy())
+    for i in range(len(x_train)):
+        prediction = model(x_train[i]).item()
+        print(f'Input: {x_train[i]}, Prediction: {prediction}, Target: {y_train[i].item()}')
