@@ -3,10 +3,13 @@ import torch.nn as nn
 import torch.optim as optim
 
 # Prepare the data
-x_train = torch.tensor([[[1.6, 1.6], [2, 1], [6.3, 1.1]],
-                         [[2, 1], [6.3, 1.1], [1.2, 1.3]],
-                         [[6.3, 1.1], [1.2, 1.3], [5.1, 1.9]]], dtype=torch.float32)
-y_train = torch.tensor([1.2, 5.1, 7.9], dtype=torch.float32).view(-1, 1)
+x_train = torch.tensor([
+    [[1, 1], [2, 2], [3, 3]],
+    [[2, 2], [3, 3], [4, 4]],
+    [[3, 3], [4, 4], [5, 5]],
+], dtype=torch.float32)
+y_train = torch.tensor([4, 5, 6], dtype=torch.float32).view(-1, 1)
+
 
 # Define the Transformer model
 class TransformerModel(nn.Module):
@@ -21,6 +24,7 @@ class TransformerModel(nn.Module):
         x = self.transformer(x, x)  # Pass through transformer
         x = x.mean(dim=0)  # Average over the sequence length
         return self.fc(x)
+
 
 # Initialize model, loss function, and optimizer
 model = TransformerModel(input_dim=2, output_dim=1)
