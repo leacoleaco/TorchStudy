@@ -56,13 +56,12 @@ def main():
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     # Training loop (for demonstration)
-    x = torch.tensor([1, 2, 3, 4])  # Input sequence
-    y_true = torch.tensor([5.0])  # Target output
+    x = torch.tensor([[1, 2, 3, 4], [2, 3, 4, 5]])  # Input sequence with batch size of 2
+    y_true = torch.tensor([[5.0], [6.0]])  # Target output for each input sequence
     epochs = 1000
     for epoch in range(epochs):
         optimizer.zero_grad()
-        x_input = x.unsqueeze(1)
-        y_pred = model(x_input)  # Model prediction
+        y_pred = model(x)  # Model prediction
         loss = criterion(y_pred, y_true)
         loss.backward()
         optimizer.step()
@@ -72,8 +71,8 @@ def main():
     # After training, you can make predictions
     model.eval()
     with torch.no_grad():
-        predicted_output = model(x.unsqueeze(1))
-        print(f'Predicted output: {predicted_output[0]}')
+        predicted_output = model(x)
+        print(f'Predicted output: {predicted_output}')
 
 
 if __name__ == '__main__':
