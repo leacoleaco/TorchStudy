@@ -123,9 +123,13 @@ class Transformer(nn.Module):
         output = self.output_layer(decoder_output.squeeze(0))
         return output
 
+print("是否可用：", torch.cuda.is_available())        # 查看GPU是否可用
+print("GPU数量：", torch.cuda.device_count())        # 查看GPU数量
+
+device = "cuda"
 
 # 创建模型实例
-model = Transformer(input_dim=2, hidden_dim=64, num_heads=8, num_layers=60)
+model = Transformer(input_dim=2, hidden_dim=64, num_heads=8, num_layers=600).to(device)
 
 # 定义损失函数和优化器
 criterion = nn.MSELoss()
@@ -156,8 +160,8 @@ def train():
         for i, data in enumerate(train_loader, 0):
             # 输入数据
             # inputs, labels = data
-            inputs = data['x']
-            labels = data['y']
+            inputs = data['x'].to(device)
+            labels = data['y'].to(device)
 
             optimizer.zero_grad()
             outputs = model(inputs)
@@ -188,9 +192,10 @@ def test():
     # 测试模式
     model.eval()
     total_loss = 0.0
-    with torch.no_grad():
+    with ((torch.no_grad())):
         for batch in test_loader:
-            inputs, targets = batch['x'], batch['y']
+            inputs = batch['x'].to(device)
+            targets = batch['y'].to(device)
             outputs = model(inputs)
             predict = outputs
             loss = criterion(predict, targets)
