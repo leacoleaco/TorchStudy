@@ -1,11 +1,9 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
+from torchvision import datasets, transforms
 
 from data.data import CustomDataset, ToTensor
-
-
-# @see  https://zhuanlan.zhihu.com/p/620820228
 
 
 class MultiHeadAttention(nn.Module):
@@ -132,32 +130,51 @@ criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 num_epochs = 10
+device = "cuda"
 
 
 def train():
     # 训练数据的维度为 (batch_size, 20, 2)，标签的维度为 (batch_size, 3)
 
-    x_train = [
-        [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [7, 7], [8, 8], [9, 9], [10, 10], [11, 11], [12, 12], [13, 13],
-         [14, 14], [15, 15], [16, 16], [17, 17], [18, 18], [19, 19], [20, 20]],
-        [[2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [7, 7], [8, 8], [9, 9], [10, 10], [11, 11], [12, 12], [13, 13],
-         [14, 14], [15, 15], [16, 16], [17, 17], [18, 18], [19, 19], [20, 20], [21, 21]],
-    ]
-    y_train = [[0, 0, 1], [1, 0, 0]]
-    # 转换数据为 Dataset
-    train_dataset = CustomDataset(x_train, y_train, transform=ToTensor())
-    # 创建 DataLoader
-    train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
+    # x_train = [
+    #     [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [7, 7], [8, 8], [9, 9], [10, 10], [11, 11], [12, 12], [13, 13],
+    #      [14, 14], [15, 15], [16, 16], [17, 17], [18, 18], [19, 19], [20, 20]],
+    #     [[2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [7, 7], [8, 8], [9, 9], [10, 10], [11, 11], [12, 12], [13, 13],
+    #      [14, 14], [15, 15], [16, 16], [17, 17], [18, 18], [19, 19], [20, 20], [21, 21]],
+    # ]
+    # y_train = [[0, 0, 1], [1, 0, 0]]
+    # # 转换数据为 Dataset
+    # train_dataset = CustomDataset(x_train, y_train, transform=ToTensor())
+    # # 创建 DataLoader
+    # train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
+
+    train_loader = torch.utils.data.DataLoader(
+        datasets.MNIST('../data', train=True, download=True,
+                       transform=transforms.Compose([
+                           transforms.ToTensor(),
+                           transforms.Normalize((0.1307,), (0.3081,))
+                       ])),
+        batch_size=1, shuffle=True, )
+    test_loader = torch.utils.data.DataLoader(
+        datasets.MNIST('../data', train=False, transform=transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.1307,), (0.3081,))
+        ])),
+        batch_size=1, shuffle=True, )
 
     # 开始训练
     model.train()
     for epoch in range(num_epochs):
         running_loss = 0.0
-        for i, data in enumerate(train_loader, 0):
+        for batch_idx, (data, target) in enumerate(train_loader):
             # 输入数据
+            # data, target = data.to(device), target.to(device)
             # inputs, labels = data
             inputs = data['x']
             labels = data['y']
+
+            data = data.reshape(-1, 28, 28)
+            labels = labels.reshape(-1, 28, 28)
 
             optimizer.zero_grad()
             outputs = model(inputs)
