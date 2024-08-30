@@ -122,13 +122,13 @@ class Transformer(nn.Module):
 
 
 # 创建模型实例
-model = Transformer(input_dim=2, hidden_dim=64, num_heads=8, num_layers=6)
+model = Transformer(input_dim=2, hidden_dim=64, num_heads=8, num_layers=60)
 
 # 定义损失函数和优化器
 criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-num_epochs = 100
+num_epochs = 10
 
 
 def train():
@@ -160,7 +160,7 @@ def train():
             outputs = model(inputs)
 
             # 计算损失
-            loss = criterion(outputs[-1], labels)
+            loss = criterion(outputs, labels)
 
             # 反向传播和优化
             loss.backward()
@@ -189,7 +189,7 @@ def test():
         for batch in test_loader:
             inputs, targets = batch['x'], batch['y']
             outputs = model(inputs)
-            predict = outputs[-1]
+            predict = outputs
             loss = criterion(predict, targets)
             total_loss += loss.item()
 
