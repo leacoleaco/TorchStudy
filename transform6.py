@@ -128,15 +128,17 @@ model = Transformer(input_dim=2, hidden_dim=64, num_heads=8, num_layers=6)
 criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-num_epochs = 10
+num_epochs = 100
 
 
 def train():
     # 训练数据的维度为 (batch_size, 20, 2)，标签的维度为 (batch_size, 3)
 
     x_train = [
-        [[1, 1], [2, 2], [3, 3]],
-        [[2, 2], [3, 3], [4, 4]],
+        [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [7, 7], [8, 8], [9, 9], [10, 10], [11, 11], [12, 12], [13, 13],
+         [14, 14], [15, 15], [16, 16], [17, 17], [18, 18], [19, 19], [20, 20]],
+        [[2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [7, 7], [8, 8], [9, 9], [10, 10], [11, 11], [12, 12], [13, 13],
+         [14, 14], [15, 15], [16, 16], [17, 17], [18, 18], [19, 19], [20, 20], [21, 21]],
     ]
     y_train = [[0, 0, 1], [1, 0, 0]]
     # 转换数据为 Dataset
@@ -158,7 +160,7 @@ def train():
             outputs = model(inputs)
 
             # 计算损失
-            loss = criterion(outputs, labels)
+            loss = criterion(outputs[-1], labels)
 
             # 反向传播和优化
             loss.backward()
@@ -173,9 +175,10 @@ def train():
 
 def test():
     x_test = [
-        [[2, 2], [3, 3], [4.1, 4]],
+        [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [7, 7], [8, 8], [9, 9], [10, 10], [11, 11], [12, 12], [13, 13],
+         [14, 14], [15, 15], [16, 16], [17, 17], [18, 18], [19, 19], [20, 20]],
     ]
-    y_test = [[1, 0, 0]]
+    y_test = [[0, 0, 1]]
     test_dataset = CustomDataset(x_test, y_test, transform=ToTensor())
     test_loader = DataLoader(test_dataset, batch_size=1)
 
@@ -186,7 +189,8 @@ def test():
         for batch in test_loader:
             inputs, targets = batch['x'], batch['y']
             outputs = model(inputs)
-            loss = criterion(outputs, targets)
+            predict = outputs[-1]
+            loss = criterion(predict, targets)
             total_loss += loss.item()
 
     average_loss = total_loss / len(test_loader)
