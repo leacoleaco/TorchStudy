@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
@@ -100,7 +101,7 @@ class Transformer(nn.Module):
         self.input_layer = nn.Linear(input_dim, hidden_dim)
         self.encoder_layers = nn.ModuleList([EncoderLayer(hidden_dim, num_heads) for _ in range(num_layers)])
         self.decoder_layers = nn.ModuleList([DecoderLayer(hidden_dim, num_heads) for _ in range(num_layers)])
-        self.output_layer = nn.Linear(hidden_dim, 3)
+        self.output_layer = nn.Linear(hidden_dim, 10)
 
     def forward(self, x):
         # Input layer
@@ -123,7 +124,7 @@ class Transformer(nn.Module):
 
 
 # 创建模型实例
-model = Transformer(input_dim=2, hidden_dim=64, num_heads=8, num_layers=60)
+model = Transformer(input_dim=2, hidden_dim=1568, num_heads=8, num_layers=60)
 
 # 定义损失函数和优化器
 criterion = nn.MSELoss()
@@ -170,11 +171,11 @@ def train():
             # 输入数据
             # data, target = data.to(device), target.to(device)
             # inputs, labels = data
-            inputs = data['x']
-            labels = data['y']
+            # inputs = data['x']
+            # labels = data['y']
 
-            data = data.reshape(-1, 28, 28)
-            labels = labels.reshape(-1, 28, 28)
+            inputs = data.view(1, 784).unsqueeze(2).repeat(1, 1, 2)
+            labels = F.one_hot(target, num_classes=10)
 
             optimizer.zero_grad()
             outputs = model(inputs)
